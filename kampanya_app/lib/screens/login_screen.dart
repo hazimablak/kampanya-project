@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:dio/dio.dart';
 import 'home_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -40,14 +41,17 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200 && response.data['success']) {
-        // Esnaf doğrulandı! Bilgileri kaydet
         final user = response.data['user'];
+        // YENİ EKLENEN KISIM: Bileti (Token) hafızaya kaydet
+        storage.write('token', response.data['token']); 
+        
         storage.write('isMerchant', true);
         storage.write('userId', user['id']);
         storage.write('userName', user['name']);
 
         Get.offAll(() => const HomeScreen());
       }
+
     } catch (e) {
       Get.snackbar('Giriş Başarısız', 'Telefon numarası veya şifre hatalı.', backgroundColor: Colors.orange, colorText: Colors.white);
     } finally {
@@ -141,6 +145,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ? const CircularProgressIndicator(color: Color(0xFFFF7A00))
                       : const Text('İşletme Sahibi Girişi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFF7A00))),
                 ),
+              ),
+              TextButton(
+                onPressed: () => Get.to(() => const RegisterScreen()),
+                child: const Text('İşletmeniz yok mu? Hemen Kayıt Olun', style: TextStyle(color: Color(0xFFFF7A00))),
               ),
             ],
           ),

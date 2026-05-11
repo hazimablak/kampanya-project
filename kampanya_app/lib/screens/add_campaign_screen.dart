@@ -61,7 +61,7 @@ class _AddCampaignScreenState extends State<AddCampaignScreen> {
   // VERİTABANINA KAYIT FONKSİYONU
   void _submitCampaign() async {
     if (!_formKey.currentState!.validate() || selectedCategory == null || selectedCity == null || selectedDate == null) {
-      Get.snackbar('Eksik Bilgi', 'Lütfen tüm alanları (Şehir, Kategori ve Bitiş Tarihi dahil) doldurun.', backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar('Eksik Bilgi', 'Lütfen tüm alanları doldurun.', backgroundColor: Colors.redAccent, colorText: Colors.white);
       return;
     }
 
@@ -69,30 +69,37 @@ class _AddCampaignScreenState extends State<AddCampaignScreen> {
 
     try {
       final dio = Dio();
-      final String backendUrl = 'http://192.168.137.1:3000'; 
-      final userId = storage.read('userId'); // Esnafın ID'si
+      final String backendUrl = 'http://10.137.38.131:3000'; // IP adresini kontrol et
+      
+      // HAFIZADAKİ BİLETİ (TOKEN) AL
+      final String? token = storage.read('token'); 
 
       final response = await dio.post(
         '$backendUrl/api/campaigns',
         data: {
-          'user_id': userId,
+          // user_id'yi sildik, çünkü backend bunu token'dan kendisi bulacak!
           'title': titleController.text,
           'description': descriptionController.text,
           'category': selectedCategory,
           'city': selectedCity,
           'district': districtController.text,
           'address': addressController.text,
-          'end_date': selectedDate!.toIso8601String(), // PostgreSQL uyumlu tarih
+          'end_date': selectedDate!.toIso8601String(),
         },
+        // BİLETİ GÜVENLİK GÖREVLİSİNE (BACKEND) GÖSTER
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
       );
 
       if (response.statusCode == 200) {
-        Get.snackbar('Başarılı!', 'Kampanyanız anında yayına alındı 🚀', backgroundColor: Colors.green, colorText: Colors.white);
-        // Başarılı olunca Ana Sayfaya geri dön (ve yenile)
+        Get.snackbar('Başarılı!', 'Kampanyanız yayına alındı 🚀', backgroundColor: Colors.green, colorText: Colors.white);
         Get.offAll(() => const HomeScreen());
       }
     } catch (e) {
-      Get.snackbar('Hata', 'Kampanya eklenirken bir sorun oluştu.', backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar('Yetki Hatası', 'Oturumunuzun süresi dolmuş olabilir. Tekrar giriş yapın.', backgroundColor: Colors.redAccent, colorText: Colors.white);
     } finally {
       setState(() => isLoading = false);
     }
