@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 : campaigns.isEmpty
                     ? const Center(child: Text('Bu kriterlere uygun kampanya bulunamadı 😔', style: TextStyle(color: Colors.grey, fontSize: 16)))
                     : ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
                         itemCount: campaigns.length,
                         itemBuilder: (context, index) {
                           final camp = campaigns[index];
