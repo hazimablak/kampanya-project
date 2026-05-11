@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-import 'services/auth_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'screens/login_screen.dart'; // Dosya yolunun doğru olduğundan emin ol
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Supabase.initialize(
-    url: 'SENIN_SUPABASE_URL_ADRESIN',
-    anonKey: 'SENIN_ANON_KEY_DEGERIN',
-  );
+  WidgetsFlutterBinding.ensureInitialized(); // Flutter motorunu hazırla
+  
+  await GetStorage.init(); // Hafıza kutusunu (GetStorage) başlat! (Çökme burdan oluyordu)
 
   runApp(const KampanyaApp());
 }
@@ -22,86 +16,14 @@ class KampanyaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // DİKKAT: MaterialApp yerine GetMaterialApp kullanmalıyız!
     return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Kampanya Avcısı',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFFFF7A00), // Orange
-        scaffoldBackgroundColor: Colors.white,
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFFF7A00),
-          elevation: 0,
-          centerTitle: true,
-        ),
+        primaryColor: const Color(0xFFFF7A00),
       ),
-      home: const SplashScreen(),
-    );
-  }
-}
-
-// Splash screen - Uygulamaya giriş
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _checkLogin();
-  }
-
-  void _checkLogin() async {
-    // 2 saniye bekle (splash göster)
-    await Future.delayed(const Duration(seconds: 2));
-    
-    // Kullanıcı giriş yapmış mı kontrol et
-    final isLoggedIn = GetStorage().read('userId') != null;
-    
-    if (isLoggedIn) {
-      Get.offAll(() => const HomeScreen());
-    } else {
-      Get.offAll(() => const LoginScreen());
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFF7A00),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.local_offer, size: 80, color: Colors.white),
-            const SizedBox(height: 20),
-            const Text(
-              'Kampanya Avcısı',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Yakınındaki İndirimler',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white70,
-              ),
-            ),
-            const SizedBox(height: 40),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ],
-        ),
-      ),
+      home: const LoginScreen(),
     );
   }
 }

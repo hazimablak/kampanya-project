@@ -69,7 +69,7 @@ class _AddCampaignScreenState extends State<AddCampaignScreen> {
 
     try {
       final dio = Dio();
-      final String backendUrl = 'http://10.137.38.131:3000'; 
+      final String backendUrl = 'http://192.168.137.1:3000'; 
       final userId = storage.read('userId'); // Esnafın ID'si
 
       final response = await dio.post(
