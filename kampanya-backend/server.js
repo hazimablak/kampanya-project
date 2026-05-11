@@ -304,29 +304,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Sunucu hatası' });
 });
 
-// QR KOD OKUTMA VE İNDİRİMİ KAYDETME
-app.post('/redemptions/scan', async (req, res) => {
-  try {
-    const { qrData, business_id } = req.body;
-    const parsedData = JSON.parse(qrData);
-
-    await pool.query(
-      `INSERT INTO redemptions (campaign_id, user_id, business_id, qr_code, verified, qr_scanned_at)
-       VALUES ($1, $2, $3, $4, true, NOW())`,
-      [parsedData.campaignId, parsedData.userId, business_id, qrData]
-    );
-
-    res.json({ success: true, message: 'İndirim başarıyla kullanıldı!' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Kod okunamadı veya zaten kullanılmış.' });
-  }
-});
-
 // ===== SUNUCU BAŞLAT =====
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🚀 Sunucu http://10.137.38.131:${PORT} adresinde çalışıyor`);
-  console.log(`   Health check: GET http://10.137.38.131:${PORT}/health`);
-  console.log(`   OTP gönder: POST http://10.137.38.131:${PORT}/auth/send-otp`);
+  console.log(`🚀 Sunucu http://localhost:${PORT} adresinde çalışıyor`);
+  console.log(`   Health check: GET http://localhost:${PORT}/health`);
+  console.log(`   OTP gönder: POST http://localhost:${PORT}/auth/send-otp`);
 });
