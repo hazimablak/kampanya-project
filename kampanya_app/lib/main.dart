@@ -4,11 +4,16 @@ import 'package:get_storage/get_storage.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
-  // Local storage initialize
-  await GetStorage.init();
-  
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'SENIN_SUPABASE_URL_ADRESIN',
+    anonKey: 'SENIN_ANON_KEY_DEGERIN',
+  );
+
   runApp(const KampanyaApp());
 }
 
