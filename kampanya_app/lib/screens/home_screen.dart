@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:dio/dio.dart';
+import 'add_campaign_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -194,8 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: isMerchant
           ? FloatingActionButton.extended(
               onPressed: () {
-                // TODO: Yeni Kampanya Ekleme Sayfasına Gidecek
-                Get.snackbar('Yakında', 'Kampanya ekleme sayfası yapım aşamasında!');
+                Get.to(() => const AddCampaignScreen());
               },
               backgroundColor: const Color(0xFFFF7A00),
               icon: const Icon(Icons.add, color: Colors.white),
