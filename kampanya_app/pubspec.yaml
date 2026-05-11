@@ -1,0 +1,64 @@
+name: kampanya_app
+description: Lokal indirim platformu
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # HTTP ve API
+  http: ^1.1.0
+  dio: ^5.3.0
+  
+  # State Management
+  get: ^4.6.5
+  
+  # UI
+  google_maps_flutter: ^2.5.0
+  qr: ^3.0.1
+  
+  # Geofencing (Arka planda konum)
+  geolocator: ^14.0.2
+  background_fetch: ^1.4.0
+  
+  # Authentication
+  # firebase_auth: ^4.10.0
+  # firebase_core: ^2.24.0
+  
+  # Notifications
+  # firebase_messaging: ^14.6.0
+  # awesome_notifications: ^0.8.0
+  
+  # Local Storage
+  get_storage: ^2.1.1
+  
+  # Other
+  intl: ^0.19.0
+  url_launcher: ^6.1.14
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
+  
+  # fonts:
+  #   - family: Poppins
+  #     fonts:
+  #       - asset: assets/fonts/Poppins-Regular.ttf
+  #       - asset: assets/fonts/Poppins-Bold.ttf
+  #         weight: 700
