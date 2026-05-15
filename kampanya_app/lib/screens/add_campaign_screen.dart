@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:dio/dio.dart';
 import 'home_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AddCampaignScreen extends StatefulWidget {
   const AddCampaignScreen({Key? key}) : super(key: key);
@@ -15,6 +16,7 @@ class _AddCampaignScreenState extends State<AddCampaignScreen> {
   final _formKey = GlobalKey<FormState>();
   final storage = GetStorage();
   bool isLoading = false;
+  final secureStorage = const FlutterSecureStorage();
 
   // Text Controller'lar
   final titleController = TextEditingController();
@@ -69,10 +71,10 @@ class _AddCampaignScreenState extends State<AddCampaignScreen> {
 
     try {
       final dio = Dio();
-      final String backendUrl = 'http://10.137.38.131:3000'; // IP adresini kontrol et
+      final String backendUrl = 'http://127.0.0.1:3000'; // IP adresini kontrol et
       
       // HAFIZADAKİ BİLETİ (TOKEN) AL
-      final String? token = storage.read('token'); 
+      final String? token = await secureStorage.read(key: 'token'); 
 
       final response = await dio.post(
         '$backendUrl/api/campaigns',

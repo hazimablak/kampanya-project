@@ -4,7 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:dio/dio.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
-
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -17,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
   final storage = GetStorage();
   bool isLoading = false;
+  final secureStorage = const FlutterSecureStorage();
 
   // ESNAF GİRİŞİ API İSTEĞİ
   void _merchantLogin() async {
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final dio = Dio();
       // BİLGİSAYARININ IP ADRESİ BURAYA (Aynı Wi-Fi'da olmalısınız)
-      final String backendUrl = 'http://192.168.137.1:3000'; 
+      final String backendUrl = 'http://127.0.0.1:3000'; 
 
       final response = await dio.post(
         '$backendUrl/api/login',
@@ -43,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200 && response.data['success']) {
         final user = response.data['user'];
         // YENİ EKLENEN KISIM: Bileti (Token) hafızaya kaydet
-        storage.write('token', response.data['token']); 
+        await secureStorage.write(key: 'token', value: response.data['token']);
         
         storage.write('isMerchant', true);
         storage.write('userId', user['id']);

@@ -25,7 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final dio = Dio();
-      final String backendUrl = 'http://10.137.38.131:3000'; // IP Adresin
+      final String backendUrl = 'http://127.0.0.1:3000'; // IP Adresin
 
       final response = await dio.post(
         '$backendUrl/api/register',

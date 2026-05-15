@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final dio = Dio();
       // BİLGİSAYARININ IP ADRESİ
-      final String backendUrl = 'http://192.168.137.1:3000'; 
+      final String backendUrl = 'http://127.0.0.1:3000'; 
       
       // Filtre parametrelerini hazırla
       Map<String, dynamic> queryParams = {};

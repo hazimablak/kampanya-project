@@ -120,5 +120,33 @@ app.post('/api/campaigns', authenticateToken, async (req, res) => {
   }
 });
 
+// 5. KAMPANYA SİL (IDOR KORUMALI)
+app.delete('/api/campaigns/:id', authenticateToken, async (req, res) => {
+  const campaignId = req.params.id; // URL'den gelen silinecek kampanya ID'si
+  const userId = req.user.id;       // Giren esnafın JWT token'ından çözülen kendi ID'si
+
+  try {
+    // SİHİRLİ DOKUNUŞ: Sadece 'id' ile değil, 'user_id' ile de eşleştiriyoruz!
+    // Yani "Silinmesi istenen kampanya ID'si bu mu VE bu kampanya bu esnafa mı ait?"
+    const result = await pool.query(
+      'DELETE FROM campaigns WHERE id = $1 AND user_id = $2 RETURNING *',
+      [campaignId, userId]
+    );
+
+    // Eğer silinen satır yoksa, ya kampanya yoktur ya da BAŞKASININDIR!
+    if (result.rows.length === 0) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Erişim reddedildi! Bu kampanya size ait değil veya bulunamadı.' 
+      });
+    }
+
+    res.json({ success: true, message: 'Kampanya başarıyla silindi!' });
+  } catch (err) {
+    console.error("🚨 SİLME HATASI:", err);
+    res.status(500).json({ error: 'Kampanya silinirken bir hata oluştu.' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Güvenli API Sunucusu http://localhost:${PORT} adresinde ayaklandı!`));
