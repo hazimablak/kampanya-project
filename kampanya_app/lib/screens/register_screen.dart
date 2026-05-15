@@ -25,7 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final dio = Dio();
-      final String backendUrl = 'http://10.137.38.131:3000'; // Kendi IP adresinle değiştir!
+      final String backendUrl = 'http://10.137.38.131:3000'; // IP Adresin
 
       final response = await dio.post(
         '$backendUrl/api/register',
@@ -41,13 +41,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Get.back(); // Giriş ekranına geri dön
       }
     } on DioException catch (e) {
+      // API'den gelen hatalar (Örn: Numara zaten var)
       if (e.response?.statusCode == 400) {
         Get.snackbar('Hata', 'Bu telefon numarası zaten kayıtlı!', backgroundColor: Colors.orange, colorText: Colors.white);
       } else {
         Get.snackbar('Hata', 'Kayıt başarısız oldu.', backgroundColor: Colors.redAccent, colorText: Colors.white);
       }
+    } catch (e) {
+      // Diğer tüm beklenmeyen hatalar
+      print("KAYIT HATASI DETAYI: $e");
+      Get.snackbar('Hata', 'Bağlantı kurulamadı!', backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
-      setState(() => isLoading = false);
+      // Sayfa hala ekrandaysa yükleme animasyonunu durdur
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
