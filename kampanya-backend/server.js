@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcrypt'); // Şifre kriptolayıcı
 const jwt = require('jsonwebtoken'); // Dijital Biletçi
 require('dotenv').config();
+const Joi = require('joi');
 const rateLimit = require('express-rate-limit');
 const app = express();
 app.use(cors());
@@ -42,8 +43,33 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+
+// GÜVENLİK DUVARI: Kayıt Verisi Kuralları (X-Ray)
+const registerSchema = Joi.object({
+  name: Joi.string().min(3).max(50).required().messages({
+    'string.min': 'İşletme adı en az 3 karakter olmalıdır.',
+    'string.max': 'İşletme adı 50 karakteri geçemez.',
+    'string.empty': 'İşletme adı boş bırakılamaz.'
+  }),
+  // Telefon numarası tam 10 haneli olmalı ve sadece rakamlardan oluşmalı (örn: 5321234567)
+  phone: Joi.string().length(10).pattern(/^[0-9]+$/).required().messages({
+    'string.length': 'Telefon numarası tam 10 haneli olmalıdır (Başta 0 olmadan).',
+    'string.pattern.base': 'Telefon numarası sadece rakamlardan oluşmalıdır.'
+  }),
+  password: Joi.string().min(6).required().messages({
+    'string.min': 'Şifreniz güvenliğiniz için en az 6 karakter olmalıdır.'
+  })
+});
+
+
 // 1. ESNAF KAYIT OL (Şifre Kriptolama)
 app.post('/api/register', async (req, res) => {
+  // Veriyi X-Ray'den geçir! Hata varsa içeri sokma, direkt cevap dön.
+  const { error } = registerSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ success: false, message: error.details[0].message });
+  }
+
   const { phone, password, name } = req.body;
   try {
     // Şifreyi 10 katmanlı tuzlama (salt) ile kırılmaz hale getir
