@@ -53,10 +53,20 @@ class _LoginScreenState extends State<LoginScreen> {
         Get.offAll(() => const HomeScreen());
       }
 
-    } catch (e) {
-      Get.snackbar('Giriş Başarısız', 'Telefon numarası veya şifre hatalı.', backgroundColor: Colors.orange, colorText: Colors.white);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        Get.snackbar('Hata', 'Numara veya şifre hatalı!', backgroundColor: Colors.redAccent, colorText: Colors.white);
+      } 
+      // İŞTE YENİ EKLENEN KALKAN KONTROLÜ
+      else if (e.response?.statusCode == 429) {
+        Get.snackbar('🛡️ Engellendi', e.response?.data['message'] ?? 'Çok fazla deneme yaptınız. Lütfen bekleyin.', 
+            backgroundColor: Colors.orange, colorText: Colors.white, duration: const Duration(seconds: 4));
+      } 
+      else {
+        Get.snackbar('Hata', 'Bağlantı kurulamadı!', backgroundColor: Colors.redAccent, colorText: Colors.white);
+      }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 

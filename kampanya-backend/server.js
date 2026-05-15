@@ -4,10 +4,17 @@ const { Pool } = require('pg');
 const bcrypt = require('bcrypt'); // Şifre kriptolayıcı
 const jwt = require('jsonwebtoken'); // Dijital Biletçi
 require('dotenv').config();
-
+const rateLimit = require('express-rate-limit');
 const app = express();
 app.use(cors());
 app.use(express.json());
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 dakika
+  max: 5, // Aynı IP'den 15 dakika içinde en fazla 5 deneme izni
+  message: { success: false, message: 'Çok fazla giriş denemesi! Lütfen 15 dakika sonra tekrar deneyin.' },
+  standardHeaders: true, 
+  legacyHeaders: false,
+});
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -54,7 +61,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 // 2. ESNAF GİRİŞ YAP (Şifre Kontrolü ve JWT Üretimi)
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', loginLimiter, async (req, res) => {
   const { phone, password } = req.body;
   try {
     // 1. Kullanıcıyı bul
