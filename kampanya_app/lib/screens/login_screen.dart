@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final dio = Dio();
       // BİLGİSAYARININ IP ADRESİ BURAYA (Aynı Wi-Fi'da olmalısınız)
-      final String backendUrl = 'http://127.0.0.1:3000'; 
+      final String backendUrl = 'http://192.168.137.1:3000'; 
 
       final response = await dio.post(
         '$backendUrl/api/login',
