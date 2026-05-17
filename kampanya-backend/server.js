@@ -7,6 +7,7 @@ require('dotenv').config();
 const Joi = require('joi');
 const rateLimit = require('express-rate-limit');
 const app = express();
+require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 const loginLimiter = rateLimit({
@@ -98,15 +99,20 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 
     // 2. Girilen şifre ile veritabanındaki kriptolu şifreyi eşleştir
     const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) return res.status(401).json({ success: false, message: 'Hatalı şifre!' });
+    if (!validPassword) return res.status(401).json({ error: 'Hatalı şifre' });
 
-    // 3. Şifre doğru! Ona 30 gün geçerli bir dijital bilet (JWT) ver
-    const token = jwt.sign({ id: user.id, phone: user.phone }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    // SİHİRLİ DOKUNUŞ: Artık 2 farklı bilet basıyoruz!
+    // 1. Kısa Ömürlü Bilet (Sadece 15 Dakika)
+    const accessToken = jwt.sign({ id: user.rows[0].id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    
+    // 2. Uzun Ömürlü VIP Bilet (7 Gün)
+    const refreshToken = jwt.sign({ id: user.rows[0].id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
     res.json({ 
       success: true, 
-      token: token, // İŞTE BU BİLET! Flutter bunu cebine atacak.
-      user: { id: user.id, name: user.name, is_business_owner: user.is_business_owner } 
+      message: 'Giriş başarılı!', 
+      accessToken: accessToken, 
+      refreshToken: refreshToken 
     });
 
   } catch (err) {
@@ -181,5 +187,25 @@ app.delete('/api/campaigns/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// 6. YENİ BİLET ALMA KAPISI (Refresh Token)
+app.post('/api/refresh', (req, res) => {
+  const { refreshToken } = req.body;
+
+  // Eğer adamın elinde VIP kart yoksa direkt kapı dışarı et
+  if (!refreshToken) return res.status(401).json({ error: 'Refresh token gerekli!' });
+
+  // VIP Kart sahte mi, süresi mi dolmuş kontrol et
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Geçersiz veya süresi dolmuş refresh token!' });
+
+    // Kart gerçekse, ona yepyeni bir 15 dakikalık bilet bas ve gönder!
+    const newAccessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    res.json({ accessToken: newAccessToken });
+  });
+});
+
+// SUNUCUYU AYAĞA KALDIR (KAPILARI AÇ)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Güvenli API Sunucusu http://localhost:${PORT} adresinde ayaklandı!`));
+app.listen(PORT, () => {
+  console.log(`🚀 Sunucu ${PORT} portunda çalışıyor!`);
+});

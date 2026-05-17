@@ -41,16 +41,12 @@ class _LoginScreenState extends State<LoginScreen> {
         },
       );
 
-      if (response.statusCode == 200 && response.data['success']) {
-        final user = response.data['user'];
-        // YENİ EKLENEN KISIM: Bileti (Token) hafızaya kaydet
-        await secureStorage.write(key: 'token', value: response.data['token']);
+      if (response.statusCode == 200) {
+        // İki bileti de kasaya saklıyoruz!
+        await secureStorage.write(key: 'accessToken', value: response.data['accessToken']);
+        await secureStorage.write(key: 'refreshToken', value: response.data['refreshToken']);
         
-        storage.write('isMerchant', true);
-        storage.write('userId', user['id']);
-        storage.write('userName', user['name']);
-
-        Get.offAll(() => const HomeScreen());
+        Get.offNamed('/home'); // Ana sayfaya yönlendir
       }
 
     } on DioException catch (e) {

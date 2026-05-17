@@ -24,7 +24,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => isLoading = true);
 
     try {
-      final dio = Dio();
+      // Sonsuz beklemeyi önleyen 5 saniyelik sınır
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 5),
+      ));
+      
       final String backendUrl = 'http://127.0.0.1:3000'; // IP Adresin
 
       final response = await dio.post(
@@ -41,17 +46,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Get.back(); // Giriş ekranına geri dön
       }
     } on DioException catch (e) {
-      // API'den gelen hatalar (Örn: Numara zaten var)
-      if (e.response?.statusCode == 400) {
-        Get.snackbar('Hata', 'Bu telefon numarası zaten kayıtlı!', backgroundColor: Colors.orange, colorText: Colors.white);
-      } else {
-        Get.snackbar('Hata', 'Kayıt başarısız oldu.', backgroundColor: Colors.redAccent, colorText: Colors.white);
-      }
+      // Node.js'ten gelen X-Ray (Joi) hata mesajını paketin içinden çıkar!
+      final String errorMessage = e.response?.data['message'] ?? e.response?.data['error'] ?? 'Kayıt başarısız oldu.';
+      
+      Get.snackbar('Hata', errorMessage, backgroundColor: Colors.orange, colorText: Colors.white, duration: const Duration(seconds: 4));
     } catch (e) {
-      // Diğer tüm beklenmeyen hatalar
       print("KAYIT HATASI DETAYI: $e");
       Get.snackbar('Hata', 'Bağlantı kurulamadı!', backgroundColor: Colors.red, colorText: Colors.white);
-    } finally {
+    } finally { 
       // Sayfa hala ekrandaysa yükleme animasyonunu durdur
       if (mounted) {
         setState(() => isLoading = false);

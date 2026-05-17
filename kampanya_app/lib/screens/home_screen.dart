@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:dio/dio.dart';
 import 'add_campaign_screen.dart';
+import 'package:kampanya_app/services/api_client.dart';
+import 'package:kampanya_app/services/api_client.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -41,26 +43,27 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchCampaigns() async {
     setState(() => isLoading = true);
     try {
-      final dio = Dio();
-      // BİLGİSAYARININ IP ADRESİ
-      final String backendUrl = 'http://127.0.0.1:3000'; 
-      
-      // Filtre parametrelerini hazırla
+      // 1. Filtre parametrelerini hazırla
       Map<String, dynamic> queryParams = {};
       if (selectedCity != null && selectedCity != 'Tümü') queryParams['city'] = selectedCity;
       if (selectedCategory != null && selectedCategory != 'Tümü') queryParams['category'] = selectedCategory;
 
-      final response = await dio.get('$backendUrl/api/campaigns', queryParameters: queryParams);
+      // 2. Ajanı göreve gönder (Adresi kendi biliyor, sadece rotayı ve filtreleri ver!)
+      final response = await ApiClient.dio.get(
+        '/api/campaigns', 
+        queryParameters: queryParams
+      );
       
+      // 3. Gelen veriyi ekrana bas
       if (response.statusCode == 200) {
         setState(() {
           campaigns = response.data;
         });
       }
     } catch (e) {
-      Get.snackbar('Hata', 'Kampanyalar yüklenemedi. Sunucu bağlantısını kontrol edin.', 
-          backgroundColor: Colors.redAccent, colorText: Colors.white);
-    } finally {
+      print("KAMPANYA ÇEKME HATASI: $e");
+      // İstersen buraya Get.snackbar ile "Veriler yüklenemedi" uyarısı da koyabilirsin.
+    }finally {
       setState(() => isLoading = false);
     }
   }
@@ -205,3 +208,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

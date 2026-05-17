@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'screens/login_screen.dart'; // Dosya yolunun doğru olduğundan emin ol
+import 'package:kampanya_app/services/api_client.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter motorunu hazırla
   
   await GetStorage.init(); // Hafıza kutusunu (GetStorage) başlat! (Çökme burdan oluyordu)
+  ApiClient.setup(); // API istemcisini başlat
 
   runApp(const KampanyaApp());
 }
