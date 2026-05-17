@@ -30,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         receiveTimeout: const Duration(seconds: 5),
       ));
       
-      final String backendUrl = 'http://192.168.137.1:3000'; // IP Adresin
+      final String backendUrl = 'http://10.245.24.131:3000'; // IP Adresin
 
       final response = await dio.post(
         '$backendUrl/api/register',

@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 class ApiClient {
   static final Dio dio = Dio(BaseOptions(
-    baseUrl: 'http://127.0.0.1:3000', // Ana adresimiz
+    baseUrl: 'http://10.245.24.131:3000', // Ana adresimiz
     connectTimeout: const Duration(seconds: 5),
     receiveTimeout: const Duration(seconds: 5),
   ));
@@ -34,7 +34,7 @@ class ApiClient {
             try {
               // Görevliye çaktırmadan VIP kartı verip yeni bilet iste
               final refreshResponse = await Dio().post(
-                'http://127.0.0.1:3000/api/refresh',
+                'http://10.245.24.131:3000/api/refresh',
                 data: {'refreshToken': refreshToken},
               );
               

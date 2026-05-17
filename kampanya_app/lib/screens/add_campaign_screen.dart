@@ -71,7 +71,7 @@ class _AddCampaignScreenState extends State<AddCampaignScreen> {
 
     try {
       final dio = Dio();
-      final String backendUrl = 'http://192.168.137.1:3000'; // IP adresini kontrol et
+      final String backendUrl = 'http://10.245.24.131:3000'; // IP adresini kontrol et
       
       // HAFIZADAKİ BİLETİ (TOKEN) AL
       final String? token = await secureStorage.read(key: 'token'); 

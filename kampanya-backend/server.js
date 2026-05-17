@@ -102,11 +102,13 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     if (!validPassword) return res.status(401).json({ error: 'Hatalı şifre' });
 
     // SİHİRLİ DOKUNUŞ: Artık 2 farklı bilet basıyoruz!
+    // HATA DÜZELTİLDİ: user.rows[0].id yerine sadece user.id yazdık!
+    
     // 1. Kısa Ömürlü Bilet (Sadece 15 Dakika)
-    const accessToken = jwt.sign({ id: user.rows[0].id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
     
     // 2. Uzun Ömürlü VIP Bilet (7 Gün)
-    const refreshToken = jwt.sign({ id: user.rows[0].id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+    const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
     res.json({ 
       success: true, 
@@ -116,6 +118,7 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     });
 
   } catch (err) {
+    console.error("LOGIN ÇÖKME HATASI:", err); // Sunucu çökerse terminalde görelim
     res.status(500).json({ error: 'Giriş hatası' });
   }
 });

@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kampanya_app/services/api_client.dart'; // Ajanı buraya çağırdık!
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -19,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   final secureStorage = const FlutterSecureStorage();
 
-  // ESNAF GİRİŞİ API İSTEĞİ
+  // ESNAF GİRİŞİ API İSTEĞİ (Ajan Kullanarak)
   void _merchantLogin() async {
     if (phoneController.text.isEmpty || passwordController.text.isEmpty) {
       Get.snackbar('Hata', 'Telefon ve şifre zorunludur!', backgroundColor: Colors.redAccent, colorText: Colors.white);
@@ -29,12 +31,9 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     try {
-      final dio = Dio();
-      // BİLGİSAYARININ IP ADRESİ BURAYA (Aynı Wi-Fi'da olmalısınız)
-      final String backendUrl = 'http://192.168.137.1:3000'; 
-
-      final response = await dio.post(
-        '$backendUrl/api/login',
+      // IP ve Dio yazmak yok! Ajan (ApiClient) adresi zaten biliyor.
+      final response = await ApiClient.dio.post(
+        '/api/login',
         data: {
           'phone': phoneController.text,
           'password': passwordController.text,
@@ -42,25 +41,36 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
-        // İki bileti de kasaya saklıyoruz!
+        // İki bileti de kasaya (Secure Storage) sakla
         await secureStorage.write(key: 'accessToken', value: response.data['accessToken']);
         await secureStorage.write(key: 'refreshToken', value: response.data['refreshToken']);
         
-        Get.offNamed('/home'); // Ana sayfaya yönlendir
+        // Esnaf rolünü normal storage'da tutabilirsin
+        storage.write('isMerchant', true); 
+        storage.write('merchantPhone', phoneController.text);
+        
+        Get.offAllNamed('/home'); // Ana sayfaya yönlendir
       }
-
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         Get.snackbar('Hata', 'Numara veya şifre hatalı!', backgroundColor: Colors.redAccent, colorText: Colors.white);
       } 
-      // İŞTE YENİ EKLENEN KALKAN KONTROLÜ
       else if (e.response?.statusCode == 429) {
-        Get.snackbar('🛡️ Engellendi', e.response?.data['message'] ?? 'Çok fazla deneme yaptınız. Lütfen bekleyin.', 
+        Get.snackbar('🛡️ Engellendi', e.response?.data['message'] ?? 'Çok fazla deneme yaptınız.', 
             backgroundColor: Colors.orange, colorText: Colors.white, duration: const Duration(seconds: 4));
       } 
       else {
-        Get.snackbar('Hata', 'Bağlantı kurulamadı!', backgroundColor: Colors.redAccent, colorText: Colors.white);
+        // KAMUFLAJI KALDIRDIK: Node.js'in fırlattığı GERÇEK hatayı paketten çıkarıp ekrana basıyoruz!
+        final String realError = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Bilinmeyen Hata';
+        
+        Get.snackbar('Backend Ne Diyor?', realError, 
+            backgroundColor: Colors.purple, colorText: Colors.white, duration: const Duration(seconds: 8));
+        
+        print("🚨 GİZLİ HATA DETAYI: ${e.response?.data}");
       }
+    } catch (e) {
+      print("LOGIN BEKLENMEYEN HATA: $e");
+      Get.snackbar('Hata', 'Bir hata oluştu!', backgroundColor: Colors.redAccent, colorText: Colors.white);
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -93,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // KOCAMAN MİSAFİR GİRİŞ BUTONU (Senin Stratejin)
+              // KOCAMAN MİSAFİR GİRİŞ BUTONU
               ElevatedButton.icon(
                 onPressed: _guestLogin,
                 icon: const Icon(Icons.explore, color: Colors.white, size: 28),
